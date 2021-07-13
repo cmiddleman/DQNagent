@@ -14,6 +14,28 @@ BOARD_LENGTH = 3
 DRAW = 0
 IN_PROGRESS = -2
 
+#Reward map
+rewards = {
+  'win' : 1,
+  'lose' : -1,
+  'draw' : .1,
+  'in_progress' : 0
+}
+
+def get_available_actions_mask(board):
+  """Finds available actions given a board state.
+
+  Args:
+      board (2D numpy array): the board state.
+
+  Returns:
+      1D numpy array: mask of available actions as flattened numpy boolean array.
+  """
+
+  assert board.shape == (BOARD_LENGTH, BOARD_LENGTH), 'invalid board was passed in to method'
+  
+  return board.flatten() == EMPTY
+
 def check_game_status(board):
   """Checks the status/winner of the passed in board
 
@@ -50,7 +72,7 @@ def check_game_status(board):
   return IN_PROGRESS
 
 def action_to_grid(action):
-  """converts an action code to grid form.
+  """converts an action key to grid form.
 
   Args:
       action (int): the integer code of the action in row then column box order
@@ -72,8 +94,8 @@ class TicTacToe(gym.Env):
      
       self.observation_space = spaces.Discrete(BOARD_LENGTH**2)
       self.action_space = spaces.Discrete(BOARD_LENGTH**2)
-      board = np.zeros((BOARD_LENGTH, BOARD_LENGTH))
-      self.state = (board, first)
+      self.reset(first)
+    
 
     def set_player(self, player):
       assert player in [X,O], 'Attempted to set player to invalid value.'
@@ -85,6 +107,14 @@ class TicTacToe(gym.Env):
       return board.copy(), player
 
     def step(self, action):
+      """Makes environment take a step according to the action passed in.
+
+      Args:
+          action (int): integer coded action for which square the current player should go (in this case 0-8)
+
+      Returns:
+          observation, reward, done, info: the state after the action has been made, the corresponding reward, whether the state is terminal, debugging info.
+      """
       reward = 0
       info = None
 
@@ -92,10 +122,10 @@ class TicTacToe(gym.Env):
       board, player = self.state
       action_row, action_col = action_to_grid(action)
 
-      #check if square is empty, if not return the current state which prompts them to go again
+      #check if square is empty, if not return the same state (with no reward, should only happen for human agents)
       if board[action_row, action_col] != EMPTY:
         print('uh oh, illegal move, try again!')
-        return self.get_obs(), 0, False, None
+        return self.get_obs(), 0, self.done, info
 
       board[action_row, action_col] = player
       self.state = (board, -player)
@@ -105,10 +135,12 @@ class TicTacToe(gym.Env):
 
       #check if game is over
       if status != IN_PROGRESS:
+        self.done = True
         print('game over', status, 'wins')
-        return self.get_obs(), reward, True, info
+        reward = status
+        #TODO make sure reward is functioning properly
 
-      return self.get_obs(), reward, False, info
+      return self.get_obs(), reward, self.done, info
 
     def render(self):
       board, player = self.state
@@ -119,11 +151,14 @@ class TicTacToe(gym.Env):
       #     print('-----------')
       for row, col in product(np.arange(BOARD_LENGTH), np.arange(BOARD_LENGTH)):
         plt.text(1/8 + col*3/8, 7/8 - row*3/8,mark_dict[board[row, col]] , size = 72, ha = 'center', va = 'center')
+      plt.show()
 
     def reset(self, first = X):
-      self.state = (np.zeros((3,3)), first)
+      self.done = False
+      self.state = (np.zeros((BOARD_LENGTH,BOARD_LENGTH)), first)
 
-
+class SuperTicTacToe(gym.Env):
+  pass
      
 
 
