@@ -2,9 +2,11 @@
 from collections import deque
 import numpy as np
 
-from tensorflow import keras
-from keras.models import Sequential
-from keras.layers import Dense, Flatten, InputLayer
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, InputLayer
+from tensorflow.keras.optimizers import Adam
+
 
 class Memory:
 
@@ -13,15 +15,22 @@ class Memory:
         self.memory = deque(maxlen=capacity)
         self.end_state_repeat = end_state_repeat
 
-    def add(self, state, action, reward, nextState, isEnd):
-        self.memory.append((state, action, reward, nextState, isEnd))
-        if isEnd:
+    def add(self, state, action, reward, next_state, is_end):
+        self.memory.append((state, action, reward, next_state, is_end))
+        if is_end:
             for _ in range(self.end_state_repeat):
-                self.memory.append((state, action, reward, nextState, isEnd))
+                self.memory.append((state, action, reward, next_state, is_end))
 
-    def getBatch(self, batchSize):
-        assert batchSize <= len(self.memory), 'batchsize larger than memory'
-        return np.random.choice(self.memory, batchSize)
+    def sample_experiences(self, batch_size):
+        assert batch_size <= len(self), 'batch_size larger than memory'
+        #return np.random.choice(self.memory, batch_size)
+        indices = np.random.randint(len(self), size=batch_size)
+        batch = [self.memory[index] for index in indices]
+        states, actions, rewards, next_states, dones = [
+            np.array([experience[field_index] for experience in batch])
+            for field_index in range(5)
+        ]
+        return states, actions, rewards, next_states, dones
     
     def __len__(self):
       return len(self.memory)
@@ -29,29 +38,34 @@ class Memory:
 
 class Network:
 
-    def __init__(self, eta=.005, tau=1/16):
+    def __init__(self, eta=.005, tau=1/8):
         self.eta = eta
         self.tau = tau
 
-        self.model = self.makeModel()
-        self.tarModel = self.makeModel()
+        self.model = self.make_model()
+        self.target_model = self.make_model()
+        self.target_model.set_weights(self.model.get_weights())
 
-    def makeModel(self, ONE_HOT_STATE_SIZE=3, BOARD_SIZE=9):
+    def make_model(self, ONE_HOT_STATE_SIZE=3, BOARD_SIZE=9):
         model = Sequential()
-        model.add(InputLayer(input_shape=(ONE_HOT_STATE_SIZE,BOARD_SIZE)))
+        model.add(InputLayer(input_shape=(BOARD_SIZE,ONE_HOT_STATE_SIZE)))
         model.add(Flatten())
         model.add(Dense(256, activation='relu'))
         model.add(Dense(256, activation='relu'))
         model.add(Dense(BOARD_SIZE, activation='linear'))
 
         model.compile(loss='mean_squared_error',
-                      optimizer=keras.optimizers.Adam(learning_rate=self.eta))
+                      optimizer=Adam(learning_rate=self.eta))
 
         return model
 
-    def updateTarModel(self):
+        
+
+    def update_target_model(self):
         weights = self.model.get_weights()
-        tarWeights = self.tarModel.get_weights()
+        target_weights = self.target_model.get_weights()
         for i in range(len(weights)):
-            tarWeights[i] = weights[i] * self.tau + tarWeights[i] * (1 - self.tau)
-        self.tarModel.set_weights(tarWeights)
+            target_weights[i] = weights[i] * self.tau + target_weights[i] * (1 - self.tau)
+        self.target_model.set_weights(target_weights)
+
+Network()

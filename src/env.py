@@ -9,6 +9,7 @@ X = 1
 O = -1
 EMPTY = 0
 BOARD_LENGTH = 3
+NUM_MARKS = 3
 
 #Status codes
 DRAW = 0

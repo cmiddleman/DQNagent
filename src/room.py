@@ -51,15 +51,14 @@ class Game_Handler:
                 #TODO figure out reward business
                 episode[-player].append((last_state, last_action, -player*reward, done))
                 
-                #lastly append the terminal state for the opponent.
-                
+                #append the terminal state for the opponent.
                 episode[-player].append((new_obs, None, None, None))
 
+                #have the agents write episode to their memory queue
                 for agent in players.keys():
                     players[agent].remember(episode[agent])
 
                 break
-        print('Game over!')
         
 
 
@@ -67,5 +66,5 @@ class Game_Handler:
 
 
 
-Game_Handler()
+#Game_Handler().play_game(do_render=True, players={X: DQNAgent(explore=False), O: DQNAgent(explore=False)})
 
