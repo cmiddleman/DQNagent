@@ -38,7 +38,7 @@ class Memory:
 
 class Network:
 
-    def __init__(self, eta=.005, tau=1/8):
+    def __init__(self, eta=.001, tau=1/64):
         self.eta = eta
         self.tau = tau
 
@@ -50,9 +50,9 @@ class Network:
         model = Sequential()
         model.add(InputLayer(input_shape=(BOARD_SIZE,ONE_HOT_STATE_SIZE)))
         model.add(Flatten())
-        model.add(Dense(256, activation='relu'))
-        model.add(Dense(256, activation='relu'))
-        model.add(Dense(BOARD_SIZE, activation='linear'))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dense(BOARD_SIZE, activation='softmax'))
 
         model.compile(loss='mean_squared_error',
                       optimizer=Adam(learning_rate=self.eta))

@@ -10,7 +10,7 @@ from agents import HumanAgent, DQNAgent
 
 class Game_Handler:
     
-    def __init__(self):
+    def __init__(self, num_agents=16):
         pass
         
     def play_game(self, env=TicTacToe(), players = {X:DQNAgent(), O:DQNAgent()}, do_render = False):
@@ -57,6 +57,7 @@ class Game_Handler:
                 #have the agents write episode to their memory queue
                 for agent in players.keys():
                     players[agent].remember(episode[agent])
+                    players[agent].learn()
 
                 break
         
