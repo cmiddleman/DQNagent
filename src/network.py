@@ -4,7 +4,7 @@ import numpy as np
 
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten, InputLayer
+from tensorflow.keras.layers import Dense, Flatten, InputLayer, Dropout
 from tensorflow.keras.optimizers import Adam
 
 
@@ -50,8 +50,11 @@ class Network:
         model = Sequential()
         model.add(InputLayer(input_shape=(BOARD_SIZE,ONE_HOT_STATE_SIZE)))
         model.add(Flatten())
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(32, activation='relu'))
+        model.add(Dense(256, activation='elu'))
+        model.add(Dropout(.2))
+        model.add(Dense(256, activation='elu'))
+        model.add(Dropout(.2))
+        model.add(Dense(256, activation='elu'))
         model.add(Dense(BOARD_SIZE, activation='linear'))
 
         model.compile(loss='mean_squared_error',
@@ -68,4 +71,3 @@ class Network:
             target_weights[i] = weights[i] * self.tau + target_weights[i] * (1 - self.tau)
         self.target_model.set_weights(target_weights)
 
-Network()

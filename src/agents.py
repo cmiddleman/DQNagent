@@ -102,6 +102,8 @@ class DQNAgent(Agent):
         state, action, reward, done = episode.pop(0)
         while(len(episode) > 0):
             next_state, next_action, next_reward, next_done = episode.pop(0)
+            print(state, action, reward, next_state, done)
+            #TODO DELETE THIS 10 AND PUT IT SOMEWHERE ELSE
             self.memory.add(state, action, 10*reward, next_state, done)
             state = next_state
             action = next_action
@@ -140,8 +142,5 @@ class DQNAgent(Agent):
 
 
 
-    
+  
 
-
-human = HumanAgent()
-human.learn()
