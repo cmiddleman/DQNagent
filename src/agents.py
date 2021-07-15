@@ -93,7 +93,7 @@ class DQNAgent(Agent):
 
         target_q_values = self.q_target(states, actions, rewards, next_states, dones)
 
-        self.network.model.fit(one_hot_encode(states), target_q_values, epochs=1, verbose=0)
+        self.network.model.fit(one_hot_encode(states), target_q_values, epochs=1, verbose=0, batch_size=int(self.batch_size/16))
 
         self.network.update_target_model()
 
