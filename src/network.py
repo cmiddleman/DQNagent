@@ -6,11 +6,12 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, InputLayer, Dropout
 from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.backend import dropout
 
 
 class Memory:
 
-    def __init__(self,end_state_repeat = 3, capacity=4096):
+    def __init__(self,end_state_repeat = 4, capacity=4096):
         self.capacity = capacity
         self.memory = deque(maxlen=capacity)
         self.end_state_repeat = end_state_repeat
@@ -38,7 +39,7 @@ class Memory:
 
 class Network:
 
-    def __init__(self, eta=.001, tau=1/64):
+    def __init__(self, eta, tau, dropout=False):
         self.eta = eta
         self.tau = tau
 
@@ -51,9 +52,11 @@ class Network:
         model.add(InputLayer(input_shape=(BOARD_SIZE,ONE_HOT_STATE_SIZE)))
         model.add(Flatten())
         model.add(Dense(256, activation='elu'))
-        model.add(Dropout(.2))
+        if dropout:
+            model.add(Dropout(.2))
         model.add(Dense(256, activation='elu'))
-        model.add(Dropout(.2))
+        if dropout:
+            model.add(Dropout(.2))
         model.add(Dense(256, activation='elu'))
         model.add(Dense(BOARD_SIZE, activation='linear'))
 

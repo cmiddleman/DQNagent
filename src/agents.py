@@ -4,6 +4,7 @@ from network import Memory, Network
 import numpy as np
 from tensorflow.keras.utils import to_categorical
 from tensorflow import one_hot
+from tensorflow.keras import backend as K
 
 def one_hot_encode(states):
     """formats environment states into network suitable for the network via one hot encoding.
@@ -44,14 +45,16 @@ class HumanAgent(Agent):
 class DQNAgent(Agent):
 
 
-    def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.005, tau=1/8, eta=.001, capacity=4096, gamma=.99 ,batch_size=64):
+    def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.0005, tau=1/64, eta=.01, eta_min=.001,eta_decay=.0005, capacity=8192, gamma=.99 ,batch_size=256, dropout=False):
             super().__init__()
 
             self.action_space = action_space
             self.memory = Memory(capacity=capacity)
-            self.network = Network(eta=eta, tau=tau)
+            self.network = Network(eta=eta, tau=tau, dropout=dropout)
             self.explore = explore
             self.eta = eta
+            self.eta_min = eta_min
+            self.eta_decay = eta_decay
             self.tau = tau
             self.gamma = gamma
             self.epsilon = epsilon
@@ -97,14 +100,18 @@ class DQNAgent(Agent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= 1 - self.epsilon_decay
 
+        #this means do learning_rate decay
+        if self.eta > self.eta_min:
+            self.eta *= 1 - self.eta_decay
+            K.set_value(self.network.model.optimizer.learning_rate, self.eta)
+            K.set_value(self.network.target_model.optimizer.learning_rate, self.eta)
+
 
     def remember(self, episode):
         state, action, reward, done = episode.pop(0)
         while(len(episode) > 0):
             next_state, next_action, next_reward, next_done = episode.pop(0)
-            print(state, action, reward, next_state, done)
-            #TODO DELETE THIS 10 AND PUT IT SOMEWHERE ELSE
-            self.memory.add(state, action, 10*reward, next_state, done)
+            self.memory.add(state, action, reward, next_state, done)
             state = next_state
             action = next_action
             reward = next_reward
@@ -119,7 +126,7 @@ class DQNAgent(Agent):
 
     def q_target(self, states, actions, rewards, next_states, dones):
 
-        target_q_values = self.q(states, use_target_model=True)
+        target_q_values = self.q(states, use_target_model=False)
 
         next_q_values = self.q(next_states, use_target_model=True)
         max_next_q_values = np.max(next_q_values, axis=1)
