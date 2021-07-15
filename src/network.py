@@ -51,13 +51,8 @@ class Network:
         model = Sequential()
         model.add(InputLayer(input_shape=(BOARD_SIZE,ONE_HOT_STATE_SIZE)))
         model.add(Flatten())
-        model.add(Dense(256, activation='elu'))
-        if dropout:
-            model.add(Dropout(.2))
-        model.add(Dense(256, activation='elu'))
-        if dropout:
-            model.add(Dropout(.2))
-        model.add(Dense(256, activation='elu'))
+        model.add(Dense(64, activation='elu'))
+        model.add(Dense(64, activation='elu'))
         model.add(Dense(BOARD_SIZE, activation='linear'))
 
         model.compile(loss='mean_squared_error',

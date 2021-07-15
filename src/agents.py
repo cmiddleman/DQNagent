@@ -42,10 +42,19 @@ class HumanAgent(Agent):
         action = input('choose a square (0-8)')
         return int(action)
 
+class RandomAgent(Agent):
+
+    def policy(self, state):
+        board, player = state
+        available_actions = get_available_actions_mask(board)
+        assert available_actions.any(), 'full board passed in, cant make any moves'
+        
+        return np.random.choice(self.action_space[available_actions])
+
 class DQNAgent(Agent):
 
 
-    def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.0005, tau=1/64, eta=.01, eta_min=.001,eta_decay=.0005, capacity=8192, gamma=.99 ,batch_size=256, dropout=False):
+    def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.0005, tau=1/256, eta=.001, eta_min=.0001,eta_decay=.0005, capacity=8192, gamma=.95 ,batch_size=4, dropout=False):
             super().__init__()
 
             self.action_space = action_space
@@ -76,6 +85,8 @@ class DQNAgent(Agent):
         #otherwise get the argmax from the network output
 
         q_table = self.q([state])[0]
+
+        print(q_table)
         
         #filter out unavailable actions
         q_table[~available_actions] = float('-inf')
@@ -93,14 +104,15 @@ class DQNAgent(Agent):
 
         target_q_values = self.q_target(states, actions, rewards, next_states, dones)
 
-        self.network.model.fit(one_hot_encode(states), target_q_values, epochs=1, verbose=0, batch_size=int(self.batch_size/16))
+     
+        self.network.model.fit(one_hot_encode(states), target_q_values, epochs=1, verbose=0)
 
         self.network.update_target_model()
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= 1 - self.epsilon_decay
 
-        #this means do learning_rate decay
+        #do learning_rate decay
         if self.eta > self.eta_min:
             self.eta *= 1 - self.eta_decay
             K.set_value(self.network.model.optimizer.learning_rate, self.eta)
