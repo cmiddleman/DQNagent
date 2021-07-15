@@ -148,8 +148,12 @@ class TicTacToe(gym.Env):
       #   print(mark_dict[row[0]], '|', mark_dict[row[1]], '|', mark_dict[row[2]])
       #   if idx < BOARD_LENGTH - 1:
       #     print('-----------')
+      fig, ax = plt.subplots()
       for row, col in product(np.arange(BOARD_LENGTH), np.arange(BOARD_LENGTH)):
-        plt.text(1/8 + col*3/8, 7/8 - row*3/8,mark_dict[board[row, col]] , size = 72, ha = 'center', va = 'center')
+        ax.text(1/8 + col*3/8, 7/8 - row*3/8,mark_dict[board[row, col]] , size = 72, ha = 'center', va = 'center')
+      ax.hlines([1/3 + 1/64,2/3 + 1/16],0,1)
+      ax.vlines([1/3,2/3],0,1)
+      ax.axis('off')
       plt.show()
 
     def reset(self, first = X):
