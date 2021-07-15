@@ -137,9 +137,7 @@ class TicTacToe(gym.Env):
       #check if game is over
       if status != IN_PROGRESS:
         self.done = True
-        print('game over', status, 'wins')
         reward = status
-        #TODO make sure reward is functioning properly
 
       return self.get_obs(), reward, self.done, info
 

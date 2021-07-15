@@ -21,15 +21,10 @@ def one_hot_encode(states):
     #encodes the board as a one-hot array
     return to_categorical(board_agent_povs % NUM_MARKS, num_classes=NUM_MARKS)
 
-hyper_param_grid = {
-    'etas':[.01, .005, .001, .0005, .0001],
-    'taus':[1/8, 1/16, 1/32, 1/64, 1/128],
-    'capacities':[2048, 4096, 8192, 16384],
-    'gammas' : [.99, .95, .9],
-    'batch_sizes' : [32, 64, 128]
-}
-
 class Agent:
+
+    def __init__(self):
+        self.record = []
 
     def policy(self, state):
         pass
@@ -50,8 +45,8 @@ class DQNAgent(Agent):
 
 
     def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.005, tau=1/8, eta=.001, capacity=4096, gamma=.99 ,batch_size=64):
+            super().__init__()
 
-            #TODO add randomized hyperparameter grid for player corpus.
             self.action_space = action_space
             self.memory = Memory(capacity=capacity)
             self.network = Network(eta=eta, tau=tau)
@@ -63,6 +58,8 @@ class DQNAgent(Agent):
             self.epsilon_min = epsilon_min
             self.epsilon_decay = epsilon_decay
             self.batch_size = batch_size
+
+            
     
     def policy(self, state):
         board, player = state
@@ -105,7 +102,7 @@ class DQNAgent(Agent):
         state, action, reward, done = episode.pop(0)
         while(len(episode) > 0):
             next_state, next_action, next_reward, next_done = episode.pop(0)
-            self.memory.add(state, action, reward, next_state, done)
+            self.memory.add(state, action, 10*reward, next_state, done)
             state = next_state
             action = next_action
             reward = next_reward
@@ -130,6 +127,15 @@ class DQNAgent(Agent):
         target_q_values[:, actions] = target_q_values_for_action
 
         return target_q_values
+
+    def get_hyper_params(self):
+        return {
+            'eta' : self.eta,
+            'tau' : self.tau,
+            'gamma' : self.gamma,
+            'capacity' : self.memory.capacity,
+            'batch_size' : self.batch_size
+        }
 
 
 

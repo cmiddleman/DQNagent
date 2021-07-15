@@ -10,7 +10,7 @@ from tensorflow.keras.optimizers import Adam
 
 class Memory:
 
-    def __init__(self,end_state_repeat = 4, capacity=4096):
+    def __init__(self,end_state_repeat = 3, capacity=4096):
         self.capacity = capacity
         self.memory = deque(maxlen=capacity)
         self.end_state_repeat = end_state_repeat
@@ -52,7 +52,7 @@ class Network:
         model.add(Flatten())
         model.add(Dense(32, activation='relu'))
         model.add(Dense(32, activation='relu'))
-        model.add(Dense(BOARD_SIZE, activation='softmax'))
+        model.add(Dense(BOARD_SIZE, activation='linear'))
 
         model.compile(loss='mean_squared_error',
                       optimizer=Adam(learning_rate=self.eta))

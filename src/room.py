@@ -3,18 +3,35 @@
 
 from env import TicTacToe, SuperTicTacToe, X, O
 from agents import HumanAgent, DQNAgent
+import numpy as np
 
 
+hyper_param_grid = {
+    'etas':[.01, .005, .001, .0005, .0001],
+    'taus':[1/8, 1/16, 1/32, 1/64, 1/128],
+    'capacities':[2048, 4096, 8192, 16384],
+    'gammas' : [.99, .95, .9],
+    'batch_sizes' : [32, 64, 128, 256]
+}
 
+def create_random_agent():
+    eta = np.random.choice(hyper_param_grid['etas'])
+    tau = np.random.choice(hyper_param_grid['taus'])
+    gamma = np.random.choice(hyper_param_grid['gammas'])
+    capacity = int(np.random.choice(hyper_param_grid['capacities']))
+    batch_size = int(np.random.choice(hyper_param_grid['batch_sizes']))
 
+    return DQNAgent(eta=eta, tau=tau, gamma=gamma, capacity=capacity, batch_size=batch_size)
 
 class Game_Handler:
     
     def __init__(self, num_agents=16):
-        pass
-        
+        self.agent_corpus = []
+        for _ in range(num_agents):
+            self.agent_corpus.append(create_random_agent())
+
     def play_game(self, env=TicTacToe(), players = {X:DQNAgent(), O:DQNAgent()}, do_render = False):
-        """play through a single loop of the environment attirbute and pass the game's episode to the agents.
+        """play through a single loop of the environment attirbute and pass the game's episode to the agents as well as calls a round of learning on each.
 
         Args:
             do_render (bool, optional): whether or not to render the environment after each step. Defaults to False.
@@ -56,16 +73,26 @@ class Game_Handler:
 
                 #have the agents write episode to their memory queue
                 for agent in players.keys():
+                    players[agent].record.append(agent*reward)
                     players[agent].remember(episode[agent])
-                    players[agent].learn()
+                   
+                
 
                 break
+
+    def play_round_robin(self):
+        """Each agent in the player corpus takes a turn playing every other agent (including itself) from both X and O positions.
+        """
+        for agentX in self.agent_corpus:
+            for agentO in self.agent_corpus:
+                self.play_game(players={X: agentX, O: agentO})
+
+        for agent in self.agent_corpus:
+            agent.learn()
         
 
 
             
 
 
-
-#Game_Handler().play_game(do_render=True, players={X: DQNAgent(explore=False), O: DQNAgent(explore=False)})
 
