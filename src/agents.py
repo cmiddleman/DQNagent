@@ -26,6 +26,7 @@ class Agent:
 
     def __init__(self):
         self.record = []
+        self.action_space=np.arange(9)
 
     def policy(self, state):
         pass
@@ -54,10 +55,9 @@ class RandomAgent(Agent):
 class DQNAgent(Agent):
 
 
-    def __init__(self, action_space=np.arange(9), explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.0005, tau=1/256, eta=.001, eta_min=.0001,eta_decay=.0005, capacity=8192, gamma=.95 ,batch_size=4, dropout=False):
+    def __init__(self, explore=True,epsilon=1, epsilon_min=.1, epsilon_decay=.0005, tau=1/1024, eta=.001, eta_min=.0001,eta_decay=.0005, capacity=16384, gamma=.95 ,batch_size=2, dropout=False):
             super().__init__()
 
-            self.action_space = action_space
             self.memory = Memory(capacity=capacity)
             self.network = Network(eta=eta, tau=tau, dropout=dropout)
             self.explore = explore
@@ -86,8 +86,6 @@ class DQNAgent(Agent):
 
         q_table = self.q([state])[0]
 
-        print(q_table)
-        
         #filter out unavailable actions
         q_table[~available_actions] = float('-inf')
 
