@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import gym
 from gym import spaces
 from itertools import product
-
+ 
 
 X = 1
 O = -1

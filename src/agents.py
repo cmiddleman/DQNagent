@@ -1,10 +1,14 @@
 
+
 from env import get_available_actions_mask, NUM_MARKS
 from network import Memory, Network
 import numpy as np
 from tensorflow.keras.utils import to_categorical
 from tensorflow import one_hot
 from tensorflow.keras import backend as K
+import tensorflow as tf
+import numba 
+from numba import jit
 
 def one_hot_encode(states):
     """formats environment states into network suitable for the network via one hot encoding.
@@ -129,6 +133,9 @@ class DQNAgent(Agent):
 
     def q(self, states, use_target_model=False):
         network_input = one_hot_encode(states)
+        return self.predict(network_input, use_target_model)
+
+    def predict(self, network_input, use_target_model=False):
         if use_target_model:
             return self.network.target_model.predict(network_input)
         else: 

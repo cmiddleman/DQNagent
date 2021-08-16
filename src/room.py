@@ -88,7 +88,7 @@ class Game_Handler:
                 self.play_game(players={X: agentX, O: agentO})
 
         for agent in self.agent_corpus:
-            agent.learn()
+            agent.learn() 
         
 
 

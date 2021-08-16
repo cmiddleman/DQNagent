@@ -1,6 +1,6 @@
 
 from collections import deque
-import numpy as np
+import numpy as np 
 
 
 from tensorflow.keras.models import Sequential
