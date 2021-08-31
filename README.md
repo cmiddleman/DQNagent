@@ -1,10 +1,1 @@
-# capstone2
-galvanize capstone 2
-
-Proposals:
-1: Create a model that leanrns how to play super tic tac toe (recursive tic tac toe) through self play. I did some some work previously related to this  (for just regular tic tac toe), repo at https://github.com/cmiddleman/tictactoe
-
-2: Get a computer vision model to figure out captchas. Test s to get past captchas from real sites like amazon.com. 
-    Dataset (potentially use others) data: https://www.kaggle.com/fournierp/captcha-version-2-images
-    
-3: Classify images of balls. https://www.kaggle.com/gpiosenka/balls-image-classification
+This project explores recent discoveries in reinforcement learning and applies them to two-player zero-sum games such as tic-tac-toe and connect 4. A paradigm I stuck to was only allowing the agent to learn through self-play, allowing the techniques to be applied to unsolved games where the optimal strategy is not known. The hyperparameter space is explored and optimization techniques are applied.
